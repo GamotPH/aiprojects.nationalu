@@ -1,0 +1,55 @@
+@import "tailwindcss";
+@tailwind utilities;
+
+/* Tokens used by components */
+@theme {
+  --color-nu-blue: #0b3b8f;
+  --color-nu-blue-600: #0d46a0;
+  --color-nu-blue-700: #0a3680;
+  --color-ink: #0f172a;
+}
+
+html, body, #root { height: 100%; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: #fff; color: var(--color-ink); }
+
+/* helpers */
+.section { @apply w-full; }
+.container { @apply mx-auto max-w-6xl px-4; }
+.section-pad { @apply py-16 md:py-24; }
+
+/* layers unchanged */
+.hero-bg{
+  position:absolute; inset:0;
+  background:center / cover no-repeat;
+  transform-origin:center;
+  will-change: opacity, transform;
+  pointer-events:none;
+}
+
+/* 3-image loop: ~5s per image when --cycle: 15s
+   - Start zoomed-in
+   - Fade in fast while already zooming out
+   - Keep zooming out the whole 0%→33.333% window (≈5s)
+   - Quick fade-out with overlap so no gray gap
+   - Never scale below 1.00 (no edges) */
+@keyframes hero-cycle-zoom5 {
+  0%        { opacity:0;   transform:scale(1.040); } /* start zoomed in */
+  1.5%      { opacity:1;   transform:scale(1.038); } /* quick fade-in */
+  33.333%   { opacity:1;   transform:scale(1.000); } /* end of our 5s window */
+  35%       { opacity:0;   transform:scale(1.000); } /* quick fade-out (overlaps next) */
+  100%      { opacity:0;   transform:scale(1.000); }
+}
+
+.hero-bg.anim{
+  animation: hero-cycle-zoom5 var(--cycle, 15s) cubic-bezier(.3,.7,.2,1) infinite both;
+}
+
+/* 3 evenly staggered layers */
+.hero-bg.delay-1{ animation-delay: 0s; }
+.hero-bg.delay-2{ animation-delay: calc(var(--cycle, 15s) / 3); }
+.hero-bg.delay-3{ animation-delay: calc(var(--cycle, 15s) * 2 / 3); }
+
+@media (prefers-reduced-motion: reduce){
+  .hero-bg.anim{ animation:none; opacity:1; transform:none; }
+}

@@ -9,8 +9,8 @@ export default function Navbar({
 }) {
   const links = useMemo(
     () => [
-      { id: "projects",    label: "Projects" },
       { id: "research",    label: "Research" },
+      { id: "projects",    label: "Projects" },
       { id: "application", label: "Application" },
       { id: "sdgs",        label: "SDGs" },
       { id: "collaborate", label: "Collaborate with Us" },
@@ -24,17 +24,19 @@ export default function Navbar({
   const [scrolled, setScrolled] = useState(false);
   const [topPx, setTopPx] = useState(80);
 
-  // Visual header constants
-  const HEADER_H = 80; // equals h-20
-  const PAD = 24;      // breathing room below header
+  // NEW: mobile menu state
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // ---- helpers ----
-  const headerBottom = () => HEADER_H + PAD; // <-- DON'T include topPx
+  const HEADER_H = 80; // equals h-20
+  const PAD = 24;
+  const MOBILE_CUTOFF = 969; // ← hamburger shows at ≤ 969px
+
+  const headerBottom = () => HEADER_H + PAD;
 
   const topPxRef = useRef(topPx);
   useEffect(() => { topPxRef.current = topPx; }, [topPx]);
 
-  // Smooth scroll with explicit offset (assumes header at top:0)
+  // Smooth scroll with explicit offset
   const scrollToId = (id, smooth = true) => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -45,82 +47,81 @@ export default function Navbar({
   const goTo = (id) => (e) => {
     e.preventDefault();
     history.replaceState(null, "", `#${id}`);
-    setActive(id);            // underline immediately
-    scrollToId(id, true);     // then smooth-scroll to corrected offset
-  };
-// add near your state
-const activeRef = useRef(active);
-useEffect(() => { activeRef.current = active; }, [active]);
-
-// ---------- UNDERLINE SCROLL-SPY ----------
-useEffect(() => {
-  const HOME_ID = "home";
-  const sectionIds = links.map(l => l.id);
-  const lastId = sectionIds[sectionIds.length - 1];
-  const headerBottom = () => HEADER_H + PAD;  // your constants
-
-  const spy = () => {
-    const anchorY = headerBottom(); // px from viewport top
-    let current = HOME_ID;          // default to HOME while in hero
-
-    for (const id of sectionIds) {
-      const el = document.getElementById(id);
-      if (!el) continue;
-      const top = el.getBoundingClientRect().top;
-      if (top <= anchorY + 0.5) current = id;
-      else break;
-    }
-
-    // don't trigger bottom fallback at page load (scrollY === 0)
-    const nearBottom =
-      window.scrollY > 0 &&
-      Math.ceil(window.scrollY + window.innerHeight) >=
-        Math.floor(document.documentElement.scrollHeight - 2);
-    if (nearBottom) current = lastId;
-
-    if (current !== activeRef.current) setActive(current);
+    setActive(id);
+    scrollToId(id, true);
   };
 
-  let ticking = false;
-  const onScrollOrResize = () => {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(() => { spy(); ticking = false; });
+  // helper for mobile: navigate then close
+  const goToMobile = (id) => (e) => {
+    goTo(id)(e);
+    setMenuOpen(false);
   };
 
-  // Init: keep underline on HOME, but honor hash for scrolling only
-  const initFromHash = () => {
-    const id = (window.location.hash || "").slice(1);
-    setActive(HOME_ID);  // underline none of the sections at start
-    if (id && (id === HOME_ID || sectionIds.includes(id))) {
-      // optional: jump to correct visual offset (no smooth) if hash is present
-      const el = document.getElementById(id);
+  const activeRef = useRef(active);
+  useEffect(() => { activeRef.current = active; }, [active]);
+
+  // ---------- UNDERLINE SCROLL-SPY ----------
+  useEffect(() => {
+    const HOME_ID = "home";
+    const sectionIds = links.map(l => l.id);
+    const lastId = sectionIds[sectionIds.length - 1];
+    const headerBottomLocal = () => HEADER_H + PAD;
+
+    const spy = () => {
+      const anchorY = headerBottomLocal();
+      let current = HOME_ID;
+
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        const top = el.getBoundingClientRect().top;
+        if (top <= anchorY + 0.5) current = id;
+        else break;
+      }
+
+      const nearBottom =
+        window.scrollY > 0 &&
+        Math.ceil(window.scrollY + window.innerHeight) >=
+          Math.floor(document.documentElement.scrollHeight - 2);
+      if (nearBottom) current = lastId;
+
+      if (current !== activeRef.current) setActive(current);
+    };
+
+    let ticking = false;
+    const onScrollOrResize = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => { spy(); ticking = false; });
+    };
+
+    const initFromHash = () => {
+      const id = (window.location.hash || "").slice(1);
+      const el = id && document.getElementById(id);
+      setActive(HOME_ID);
       if (el) {
-        const y = window.scrollY + el.getBoundingClientRect().top - headerBottom();
+        const y = window.scrollY + el.getBoundingClientRect().top - headerBottomLocal();
         window.scrollTo({ top: Math.max(0, y), behavior: "auto" });
       }
-    }
-    // reconcile after layout/images
-    requestAnimationFrame(() => setTimeout(spy, 50));
-  };
+      requestAnimationFrame(() => setTimeout(spy, 50));
+    };
 
-  window.addEventListener("scroll", onScrollOrResize, { passive: true });
-  window.addEventListener("resize", onScrollOrResize);
-  window.addEventListener("hashchange", initFromHash);
-  window.addEventListener("load", spy);
+    window.addEventListener("scroll", onScrollOrResize, { passive: true });
+    window.addEventListener("resize", onScrollOrResize);
+    window.addEventListener("hashchange", initFromHash);
+    window.addEventListener("load", spy);
 
-  requestAnimationFrame(initFromHash);
-  return () => {
-    window.removeEventListener("scroll", onScrollOrResize);
-    window.removeEventListener("resize", onScrollOrResize);
-    window.removeEventListener("hashchange", initFromHash);
-    window.removeEventListener("load", spy);
-  };
-// eslint-disable-next-line react-hooks/exhaustive-deps
-}, [links.map(l => l.id).join("|")]);
+    requestAnimationFrame(initFromHash);
+    return () => {
+      window.removeEventListener("scroll", onScrollOrResize);
+      window.removeEventListener("resize", onScrollOrResize);
+      window.removeEventListener("hashchange", initFromHash);
+      window.removeEventListener("load", spy);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [links.map(l => l.id).join("|")]);
 
-
-  // ---------- Sticky bar slide/blur (unchanged) ----------
+  // ---------- Sticky bar slide/blur ----------
   useEffect(() => {
     const START_OFFSET = 80;
     const BLUR_TRIGGER = 64;
@@ -134,6 +135,46 @@ useEffect(() => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // ---------- Mobile menu housekeeping ----------
+  useEffect(() => {
+    const onKey = (e) => e.key === "Escape" && setMenuOpen(false);
+    const onResize = () => { if (window.innerWidth > MOBILE_CUTOFF) setMenuOpen(false); };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("resize", onResize);
+    document.documentElement.classList.toggle("overflow-hidden", menuOpen);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", onResize);
+      document.documentElement.classList.remove("overflow-hidden");
+    };
+  }, [menuOpen]);
+
+  // precompute panel top/max-height so it sits just under the sliding header
+  const panelTop = Math.max(0, topPx + HEADER_H);
+  const panelMaxH = `calc(100dvh - ${panelTop}px)`;
+
+  const brandTopCls = [
+    "text-[10px] md:text-xs font-semibold tracking-[0.18em] uppercase",
+    scrolled ? "text-nu-blue/80" : "text-white/80",
+  ].join(" ");
+
+  const brandMainCls = [
+    "font-semibold","text-base md:text-2xl",
+    scrolled ? "text-nu-blue" : "text-white",
+  ].join(" ");
+
+  const linkBase = [
+    "uppercase text-sm font-semibold tracking-wide",
+    "pt-1 pb-3 transition-colors",
+  ].join(" ");
+
+  // SHOW at ≤ 969px only
+  const iconBtnClasses = [
+    "hidden max-[969px]:inline-flex items-center justify-center rounded-md",
+    "p-2 ring-1 focus:outline-none focus-visible:ring-2",
+    scrolled ? "text-nu-blue ring-nu-blue/20" : "text-white ring-white/30",
+  ].join(" ");
 
   return (
     <header
@@ -155,19 +196,13 @@ useEffect(() => {
             <div className="h-9 w-9 md:h-12 md:w-12 rounded bg-white/20" />
           )}
           <div className="leading-tight">
-            <div className={["text-[10px] md:text-xs font-semibold tracking-[0.18em] uppercase",
-              scrolled ? "text-nu-blue/80" : "text-white/80"].join(" ")}>
-              {brandTop}
-            </div>
-            <div className={["font-semibold","text-base md:text-2xl",
-              scrolled ? "text-nu-blue" : "text-white"].join(" ")}>
-              {brandMain || siteTitle}
-            </div>
+            <div className={brandTopCls}>{brandTop}</div>
+            <div className={brandMainCls}>{mainText}</div>
           </div>
         </a>
 
-        {/* Links */}
-        <ul className="hidden md:flex items-center gap-12">
+        {/* Desktop links: HIDE at ≤ 969px */}
+        <ul className="flex items-center gap-12 max-[969px]:hidden">
           {links.map((l) => {
             const isActive = active === l.id;
             return (
@@ -176,8 +211,7 @@ useEffect(() => {
                   href={`#${l.id}`}
                   onClick={goTo(l.id)}
                   className={[
-                    "relative inline-block uppercase text-sm font-semibold tracking-wide",
-                    "pt-1 pb-3 transition-colors",
+                    "relative inline-block", linkBase,
                     scrolled ? "text-nu-blue hover:text-nu-blue" : "text-white/90 hover:text-white",
                   ].join(" ")}
                 >
@@ -194,7 +228,75 @@ useEffect(() => {
             );
           })}
         </ul>
+
+        {/* Hamburger (≤ 969px) */}
+        <button
+          type="button"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((v) => !v)}
+          className={iconBtnClasses}
+        >
+          {menuOpen ? (
+            <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6l-12 12" />
+            </svg>
+          ) : (
+            <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
       </nav>
+
+      {/* Mobile overlay + panel: only at ≤ 969px */}
+      <div
+        className={[
+          "fixed inset-0 z-40 transition-opacity duration-200",
+          "hidden max-[969px]:block",
+          menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
+        ].join(" ")}
+        onClick={() => setMenuOpen(false)}
+      >
+        {/* dim background (click to close) */}
+        <div className="absolute inset-0 bg-black/40" />
+
+        {/* panel (clicks inside shouldn't close) */}
+        <div
+          className={[
+            "absolute inset-x-4 rounded-2xl shadow-xl",
+            "bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/95",
+            "ring-1 ring-slate-200",
+            "transition-transform duration-200",
+            menuOpen ? "translate-y-0" : "-translate-y-2",
+          ].join(" ")}
+          style={{ top: panelTop, maxHeight: panelMaxH, overflow: "auto" }}
+          onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+        >
+          <ul className="divide-y divide-slate-100 p-2">
+            {links.map((l) => {
+              const isActive = active === l.id;
+              return (
+                <li key={l.id}>
+                  <a
+                    href={`#${l.id}`}
+                    onClick={goToMobile(l.id)}
+                    className={[
+                      "block px-4 py-3 text-base font-semibold",
+                      isActive ? "text-nu-blue" : "text-slate-800",
+                      "active:bg-slate-100 rounded-lg",
+                    ].join(" ")}
+                  >
+                    {l.label}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
     </header>
   );
 }

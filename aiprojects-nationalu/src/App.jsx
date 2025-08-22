@@ -46,8 +46,8 @@ export default function App() {
             ctaText={data.heroCtaText}
             ctaHref={data.heroCtaHref}
           />
-          <Projects items={Array.isArray(data.projects) ? data.projects : []} />
           <Highlights items={Array.isArray(data.highlights) ? data.highlights : []} />
+          <Projects items={Array.isArray(data.projects) ? data.projects : []} />
           <Applications items={Array.isArray(data.applications) ? data.applications : []} />
           <SDG items={Array.isArray(data.sdgs) ? data.sdgs : []} />
           <Collaborate

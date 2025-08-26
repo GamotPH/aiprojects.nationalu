@@ -89,6 +89,65 @@ export default {
   }]
 },
 
+    // >>> NEW: Publications embedded on landing page
+    {
+  name: "papers",
+  title: "Papers (Landing Page)",
+  description: "Add papers to feature on the homepage.",
+  type: "array",
+  of: [{
+    type: "object",
+    fields: [
+      { name: "title", type: "string", validation: R => R.required() },
+      { name: "authors", type: "string" },
+      { name: "citation", type: "text", rows: 4, title: "Citation (formatted)" },
+      { name: "date", type: "date", options: { dateFormat: "YYYY-MM-DD" } },
+      { name: "venue", type: "string", title: "Venue / Journal" },
+      { name: "excerpt", type: "text", title: "Abstract / Excerpt" },
+      { name: "link", type: "url", title: "External Link" },
+      { name: "pdf", type: "file", options: { accept: ".pdf" } },
+      { name: "coverImage", type: "image", options: { hotspot: true } },
+      { name: "featured", type: "boolean" }
+    ],
+    preview: {
+      select: { title: "title", subtitle: "authors", media: "coverImage" }
+    }
+  }]
+},
+
+// NEW — People / Research Team Lab (embedded on landing page)
+{
+  name: "teamLab",
+  title: "Research Team Lab (People)",
+  type: "array",
+  of: [{
+    type: "object",
+    fields: [
+      { name: "name", title: "Full Name", type: "string", validation: R => R.required() },
+      { name: "role", title: "Role", type: "string" },
+      { name: "image", title: "Image", type: "image", options: { hotspot: true } },
+
+      // Layout helpers (optional)
+      { name: "colSpan", title: "Column Span (1–4)", type: "number" },
+      { name: "rowSpan", title: "Row Span (1–7)", type: "number" },
+      { name: "colStart", title: "Column Start (Optional)", type: "number" },
+      { name: "rowStart", title: "Row Start (Optional)", type: "number" },
+
+      { name: "displayOrder", title: "Display Order", type: "number", validation: R => R.required().min(0) },
+
+      { name: "slug", title: "Slug", type: "slug", options: { source: "name", maxLength: 96 }, validation: R => R.required() },
+
+      // Bionote
+      { name: "overviewTitle", title: "Overview Title", type: "string" },
+      { name: "overviewText", title: "Overview Text", type: "text" }
+    ],
+    preview: {
+      select: { title: "name", subtitle: "role", media: "image" }
+    }
+  }]
+},
+
+
     // Partners (logos row)
     {
       name: "partners",

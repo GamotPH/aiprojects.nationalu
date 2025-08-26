@@ -11,8 +11,9 @@ export default function Navbar({
     () => [
       { id: "research",    label: "Research" },
       { id: "projects",    label: "Projects" },
-      { id: "application", label: "Application" },
       { id: "sdgs",        label: "SDGs" },
+      { id: "papers",      label: "Papers" },
+      { id: "people",      label: "People" },
       { id: "collaborate", label: "Collaborate with Us" },
     ],
     []

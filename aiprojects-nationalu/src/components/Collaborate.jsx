@@ -86,7 +86,7 @@ export default function Collaborate({
         </div>
       </div>
 
-      {/* Divider / dark bar with logos + nav links mock (as in screenshot) */}
+            {/* Divider / dark bar with logos */}
       <div className="w-full bg-[#0A1C36]">
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-8 px-6 py-10 md:flex-row md:justify-between">
           {/* Logos row */}
@@ -104,26 +104,31 @@ export default function Collaborate({
         </div>
       </div>
 
-      {/* Bottom lockup & tagline */}
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-10 md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="text-sm tracking-wide text-white/80">
-            NATIONAL UNIVERSITY
-          </p>
-          <p className="mt-1 text-2xl font-semibold">
-            <span className="opacity-90">AI </span>
-            <span className="opacity-100">Projects</span>
-          </p>
-        </div>
+      {/* Bottom lockup & tagline with DARKER background */}
+      <div className="w-full bg-[#05172B]">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-10 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-sm tracking-wide text-white/80">
+              NATIONAL UNIVERSITY
+            </p>
+            <p className="mt-1 text-2xl font-semibold">
+              <span className="opacity-90">AI </span>
+              <span className="opacity-100">Projects</span>
+            </p>
+          </div>
 
-        <div className="flex items-center gap-3">
-          <p className="text-center text-lg leading-7 text-white/90 md:text-right">
-            Empowering Communities
-            <br className="hidden sm:block" />
-            Through Language Technology
-          </p>
-          {/* small decorative bar */}
-          <div className="h-12 w-1 rounded bg-white/70" aria-hidden="true" />
+          <div className="flex items-center gap-3">
+            <p className="text-center text-lg leading-7 text-white/90 md:text-right">
+              Empowering Communities
+              <br className="hidden sm:block" />
+              Through Language Technology
+            </p>
+            {/* small decorative bar */}
+            <div
+              className="h-12 w-1 rounded bg-white/70"
+              aria-hidden="true"
+            />
+          </div>
         </div>
       </div>
 

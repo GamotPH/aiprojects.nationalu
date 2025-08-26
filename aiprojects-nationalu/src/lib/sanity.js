@@ -26,6 +26,23 @@ export async function fetchLandingPage() {
   "iconAlt": icon.alt,
   blurb
 },
+  // >>> People (sorted by 'order' then name)
+    "people": people[] | order(coalesce(order, 1e9) asc, name asc){
+      name, role, bio, email, linkedin, order,
+      "photoUrl": photo.asset->url
+    },
+
+    // >>> Publications (sorted by date desc)
+    papers[] | order(date desc){
+      title, authors, date, venue, excerpt, link, featured, citation, slug,
+      "coverUrl": coverImage.asset->url,
+      "pdfUrl": pdf.asset->url
+    },
+    "teamLab": teamLab[] | order(displayOrder asc){
+      _id, name, role, slug, overviewTitle, overviewText,
+      colSpan, rowSpan, colStart, rowStart, displayOrder,
+      "photoUrl": image.asset->url
+    },
     partners[]{ name, href, "logoUrl": logo.asset->url },
     collabTitle, collabBody, contactEmail,
     footerNote

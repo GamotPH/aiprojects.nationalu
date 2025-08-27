@@ -1,5 +1,6 @@
 // src/components/Navbar.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function Navbar({
   brandTop = "NATIONAL UNIVERSITY",
@@ -7,14 +8,19 @@ export default function Navbar({
   siteTitle = "AI Projects",
   logoUrl,
 }) {
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  // type: 'hash' -> scroll to section on landing page
+  // type: 'route' -> navigate to another page
   const links = useMemo(
     () => [
-      { id: "research",    label: "Research" },
-      { id: "projects",    label: "Projects" },
-      { id: "sdgs",        label: "SDGs" },
-      { id: "papers",      label: "Papers" },
-      { id: "people",      label: "People" },
-      { id: "collaborate", label: "Collaborate with Us" },
+      { id: "research",    label: "Research",            type: "hash"  },
+      { id: "projects",    label: "Projects",            type: "hash"  },
+      { id: "sdgs",        label: "SDGs",                type: "hash"  },
+      { id: "papers",      label: "Papers",              type: "hash"  },
+      { id: "people",      label: "People",              type: "route", to: "/people" },
+      { id: "collaborate", label: "Collaborate with Us", type: "hash"  },
     ],
     []
   );
@@ -24,20 +30,18 @@ export default function Navbar({
   const [active, setActive] = useState("home");
   const [scrolled, setScrolled] = useState(false);
   const [topPx, setTopPx] = useState(80);
-
-  // NEW: mobile menu state
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const HEADER_H = 80; // equals h-20
+  const HEADER_H = 80;
   const PAD = 24;
-  const MOBILE_CUTOFF = 969; // ← hamburger shows at ≤ 969px
+  const MOBILE_CUTOFF = 969;
 
   const headerBottom = () => HEADER_H + PAD;
 
   const topPxRef = useRef(topPx);
   useEffect(() => { topPxRef.current = topPx; }, [topPx]);
 
-  // Smooth scroll with explicit offset
+  // Smooth scroll with explicit offset (landing page)
   const scrollToId = (id, smooth = true) => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -45,14 +49,20 @@ export default function Navbar({
     window.scrollTo({ top: Math.max(0, target), behavior: smooth ? "smooth" : "auto" });
   };
 
-  const goTo = (id) => (e) => {
-    e.preventDefault();
-    history.replaceState(null, "", `#${id}`);
-    setActive(id);
-    scrollToId(id, true);
-  };
+const goTo = (id) => (e) => {
+   e.preventDefault();
+   // If we're NOT on the landing page, navigate there and pass which section to scroll to.
+   if (location.pathname !== "/") {
+     navigate("/", { state: { section: id } });
+     setActive(id);
+     return;
+   }
+   // Already on landing → do normal smooth scroll
+   history.replaceState(null, "", `#${id}`);
+   setActive(id);
+   scrollToId(id, true);
+ };
 
-  // helper for mobile: navigate then close
   const goToMobile = (id) => (e) => {
     goTo(id)(e);
     setMenuOpen(false);
@@ -64,12 +74,23 @@ export default function Navbar({
   // ---------- UNDERLINE SCROLL-SPY ----------
   useEffect(() => {
     const HOME_ID = "home";
-    const sectionIds = links.map(l => l.id);
+    const sectionIds = links.filter(l => l.type === "hash").map(l => l.id);
     const lastId = sectionIds[sectionIds.length - 1];
-    const headerBottomLocal = () => HEADER_H + PAD;
+
+    const checkRouteFirst = () => {
+      const h = window.location.hash || "";
+      // When on a routed page (HashRouter), hash looks like "#/people"
+      if (h.startsWith("#/people")) {
+        if (activeRef.current !== "people") setActive("people");
+        return true; // skip section spy
+      }
+      return false;
+    };
 
     const spy = () => {
-      const anchorY = headerBottomLocal();
+      if (checkRouteFirst()) return;
+
+      const anchorY = HEADER_H + PAD;
       let current = HOME_ID;
 
       for (const id of sectionIds) {
@@ -89,22 +110,23 @@ export default function Navbar({
       if (current !== activeRef.current) setActive(current);
     };
 
+    const initFromHash = () => {
+      if (checkRouteFirst()) return;
+      const id = (window.location.hash || "").slice(1);
+      const el = id && document.getElementById(id);
+      setActive(HOME_ID);
+      if (el) {
+        const y = window.scrollY + el.getBoundingClientRect().top - (HEADER_H + PAD);
+        window.scrollTo({ top: Math.max(0, y), behavior: "auto" });
+      }
+      requestAnimationFrame(() => setTimeout(spy, 50));
+    };
+
     let ticking = false;
     const onScrollOrResize = () => {
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(() => { spy(); ticking = false; });
-    };
-
-    const initFromHash = () => {
-      const id = (window.location.hash || "").slice(1);
-      const el = id && document.getElementById(id);
-      setActive(HOME_ID);
-      if (el) {
-        const y = window.scrollY + el.getBoundingClientRect().top - headerBottomLocal();
-        window.scrollTo({ top: Math.max(0, y), behavior: "auto" });
-      }
-      requestAnimationFrame(() => setTimeout(spy, 50));
     };
 
     window.addEventListener("scroll", onScrollOrResize, { passive: true });
@@ -132,7 +154,7 @@ export default function Navbar({
       setScrolled(window.scrollY > BLUR_TRIGGER);
     };
 
-    onScroll(); // initial
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -151,7 +173,6 @@ export default function Navbar({
     };
   }, [menuOpen]);
 
-  // precompute panel top/max-height so it sits just under the sliding header
   const panelTop = Math.max(0, topPx + HEADER_H);
   const panelMaxH = `calc(100dvh - ${panelTop}px)`;
 
@@ -159,18 +180,14 @@ export default function Navbar({
     "text-[10px] md:text-xs font-semibold tracking-[0.18em] uppercase",
     scrolled ? "text-nu-blue/80" : "text-white/80",
   ].join(" ");
-
   const brandMainCls = [
-    "font-semibold","text-base md:text-2xl",
+    "font-semibold", "text-base md:text-2xl",
     scrolled ? "text-nu-blue" : "text-white",
   ].join(" ");
-
   const linkBase = [
     "uppercase text-sm font-semibold tracking-wide",
     "pt-1 pb-3 transition-colors",
   ].join(" ");
-
-  // SHOW at ≤ 969px only
   const iconBtnClasses = [
     "hidden max-[969px]:inline-flex items-center justify-center rounded-md",
     "p-2 ring-1 focus:outline-none focus-visible:ring-2",
@@ -189,7 +206,7 @@ export default function Navbar({
       ].join(" ")}
     >
       <nav className="container h-20 flex items-center justify-between px-6 md:px-8">
-        {/* Logo + brand */}
+        {/* Logo + brand (click -> go to landing page top) */}
         <a href="#home" onClick={goTo("home")} className="flex items-center gap-4 md:gap-5">
           {logoUrl ? (
             <img src={logoUrl} alt="Logo" className="h-9 w-auto md:h-12 object-contain" />
@@ -202,29 +219,40 @@ export default function Navbar({
           </div>
         </a>
 
-        {/* Desktop links: HIDE at ≤ 969px */}
+        {/* Desktop links */}
         <ul className="flex items-center gap-12 max-[969px]:hidden">
           {links.map((l) => {
             const isActive = active === l.id;
+            const cls = [
+              "relative inline-block", linkBase,
+              scrolled ? "text-nu-blue hover:text-nu-blue" : "text-white/90 hover:text-white",
+            ].join(" ");
+
             return (
               <li key={l.id}>
-                <a
-                  href={`#${l.id}`}
-                  onClick={goTo(l.id)}
-                  className={[
-                    "relative inline-block", linkBase,
-                    scrolled ? "text-nu-blue hover:text-nu-blue" : "text-white/90 hover:text-white",
-                  ].join(" ")}
-                >
-                  {l.label}
-                  <span
-                    className={[
-                      "pointer-events-none absolute left-1/2 -translate-x-1/2 -bottom-0.5 h-0.5 rounded-full transition-all duration-200",
-                      isActive ? "w-10" : "w-0",
-                      scrolled ? "bg-nu-blue" : "bg-white",
-                    ].join(" ")}
-                  />
-                </a>
+                {l.type === "route" ? (
+                  <Link to={l.to} className={cls} onClick={() => setActive(l.id)}>
+                    {l.label}
+                    <span
+                      className={[
+                        "pointer-events-none absolute left-1/2 -translate-x-1/2 -bottom-0.5 h-0.5 rounded-full transition-all duration-200",
+                        isActive ? "w-10" : "w-0",
+                        scrolled ? "bg-nu-blue" : "bg-white",
+                      ].join(" ")}
+                    />
+                  </Link>
+                ) : (
+                  <a href={`#${l.id}`} onClick={goTo(l.id)} className={cls}>
+                    {l.label}
+                    <span
+                      className={[
+                        "pointer-events-none absolute left-1/2 -translate-x-1/2 -bottom-0.5 h-0.5 rounded-full transition-all duration-200",
+                        isActive ? "w-10" : "w-0",
+                        scrolled ? "bg-nu-blue" : "bg-white",
+                      ].join(" ")}
+                    />
+                  </a>
+                )}
               </li>
             );
           })}
@@ -250,7 +278,7 @@ export default function Navbar({
         </button>
       </nav>
 
-      {/* Mobile overlay + panel: only at ≤ 969px */}
+      {/* Mobile overlay + panel */}
       <div
         className={[
           "fixed inset-0 z-40 transition-opacity duration-200",
@@ -259,10 +287,7 @@ export default function Navbar({
         ].join(" ")}
         onClick={() => setMenuOpen(false)}
       >
-        {/* dim background (click to close) */}
         <div className="absolute inset-0 bg-black/40" />
-
-        {/* panel (clicks inside shouldn't close) */}
         <div
           className={[
             "absolute inset-x-4 rounded-2xl shadow-xl",
@@ -279,19 +304,31 @@ export default function Navbar({
           <ul className="divide-y divide-slate-100 p-2">
             {links.map((l) => {
               const isActive = active === l.id;
+              const mobileCls = [
+                "block px-4 py-3 text-base font-semibold",
+                isActive ? "text-nu-blue" : "text-slate-800",
+                "active:bg-slate-100 rounded-lg",
+              ].join(" ");
+
               return (
                 <li key={l.id}>
-                  <a
-                    href={`#${l.id}`}
-                    onClick={goToMobile(l.id)}
-                    className={[
-                      "block px-4 py-3 text-base font-semibold",
-                      isActive ? "text-nu-blue" : "text-slate-800",
-                      "active:bg-slate-100 rounded-lg",
-                    ].join(" ")}
-                  >
-                    {l.label}
-                  </a>
+                  {l.type === "route" ? (
+                    <Link
+                      to={l.to}
+                      className={mobileCls}
+                      onClick={() => { setActive(l.id); setMenuOpen(false); }}
+                    >
+                      {l.label}
+                    </Link>
+                  ) : (
+                    <a
+                      href={`#${l.id}`}
+                      onClick={goToMobile(l.id)}
+                      className={mobileCls}
+                    >
+                      {l.label}
+                    </a>
+                  )}
                 </li>
               );
             })}

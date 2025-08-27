@@ -16,6 +16,7 @@ export default function Hero({
   bgImage = bg1,
   bgImage2 = bg2,
   bgImage3 = bg3,
+  hideRobot = false,
 }) {
   return (
     <section
@@ -71,37 +72,28 @@ export default function Hero({
             )}
           </div>
 
-          {/* INLINE robot — phones, tablets, and smaller desktops (prevents overlap) */}
-          <div className="xl:hidden mt-4 sm:mt-6 md:mt-8 flex justify-center">
-            <img
-              src={robotGif}
-              alt=""
-              className="pointer-events-none select-none block h-auto
-                         w-[min(420px,70vw)] sm:w-[min(460px,60vw)] md:w-[min(520px,55vw)] 
-                         drop-shadow-2xl rounded-xl"
-              draggable="false"
-            />
-          </div>
+          {!hideRobot && (
+           <div className="xl:hidden mt-4 sm:mt-6 md:mt-8 flex justify-center">
+             <img
+               src={robotGif}
+               alt=""
+               className="pointer-events-none select-none block h-auto w-[min(420px,70vw)] sm:w-[min(460px,60vw)] md:w-[min(520px,55vw)] drop-shadow-2xl rounded-xl"
+               draggable="false"
+             />
+           </div>
+         )}
         </div>
       </div>
 
       {/* OVERLAY robot — only when there’s ample width (≥1280px), so it never hits the text */}
-      <figure
-        className="
-          hidden xl:block
-          absolute bottom-45 right-12 z-[2]
-          w-[clamp(260px,28vw,520px)]
-          pointer-events-none select-none
-        "
-        aria-hidden="true"
-      >
-        <img
-          src={robotGif}
-          alt=""
-          className="block w-full h-auto drop-shadow-2xl rounded-xl"
-          draggable="false"
-        />
-      </figure>
+      {!hideRobot && (
+       <figure
+         className="hidden xl:block absolute bottom-45 right-12 z-[2] w-[clamp(260px,28vw,520px)] pointer-events-none select-none"
+         aria-hidden="true"
+       >
+         <img src={robotGif} alt="" className="block w-full h-auto drop-shadow-2xl rounded-xl" draggable="false" />
+       </figure>
+     )}
     </section>
   );
 }

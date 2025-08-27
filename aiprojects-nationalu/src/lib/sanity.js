@@ -39,10 +39,11 @@ export async function fetchLandingPage() {
       "pdfUrl": pdf.asset->url
     },
     "teamLab": teamLab[] | order(displayOrder asc){
-      _id, name, role, slug, overviewTitle, overviewText,
-      colSpan, rowSpan, colStart, rowStart, displayOrder,
-      "photoUrl": image.asset->url
-    },
+  _key,
+  name, role, slug, overviewTitle, overviewText,
+  colSpan, rowSpan, colStart, rowStart, displayOrder,
+  "photo": image
+},
     partners[]{ name, href, "logoUrl": logo.asset->url },
     collabTitle, collabBody, contactEmail,
     footerNote

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchLandingPage } from "./lib/sanity";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import Navbar from "./components/Navbar.jsx";
 import Hero from "./components/Hero.jsx";
@@ -13,12 +14,38 @@ import PeopleSection from "./components/PeopleSection.jsx";
 export default function App() {
   const [data, setData] = useState(null);
   const [err, setErr] = useState(null);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchLandingPage()
       .then(setData)
       .catch((e) => setErr(e?.message || "Failed to load"));
   }, []);
+  // When navigated from another page with { state: { section } }, scroll to that section
+useEffect(() => {
+  const section = location.state?.section;
+  if (!data || !section) return;
+
+  const HEADER_H = 80; // same as Navbar
+  const PAD = 24;
+  const offset = HEADER_H + PAD;
+
+  const scrollToWithOffset = (id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const y = window.scrollY + el.getBoundingClientRect().top - offset;
+    window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+  };
+
+  // wait one frame so sections exist, then scroll
+  requestAnimationFrame(() => {
+    setTimeout(() => scrollToWithOffset(section), 0);
+  });
+
+  // clear the state so back/forward doesn't re-scroll unexpectedly
+  navigate(".", { replace: true, state: null });
+}, [data, location.state, navigate]);
 
   return (
     <>
@@ -52,7 +79,6 @@ export default function App() {
           <Projects items={Array.isArray(data.projects) ? data.projects : []} />
           <SDG items={Array.isArray(data.sdgs) ? data.sdgs : []} />
           <PapersSection items={Array.isArray(data.papers) ? data.papers : []} />
-          <PeopleSection items={Array.isArray(data.teamLab) ? data.teamLab : []} />
           <Collaborate
             title={data.collabTitle}
             body={data.collabBody}

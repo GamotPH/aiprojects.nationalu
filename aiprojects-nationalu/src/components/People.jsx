@@ -1,12 +1,25 @@
 // src/pages/People.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";      // ← add Link
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 import Hero from "../components/Hero.jsx";
 import { fetchLandingPage } from "../lib/sanity";
 import { urlFor } from "../lib/sanityImg";
 
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, Number(n) || 0));
+
+/** true when viewport >= 1024px (Tailwind lg) */
+function useIsLg() {
+  const get = () => window.matchMedia("(min-width: 1024px)").matches;
+  const [isLg, setIsLg] = useState(get);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const onChange = () => setIsLg(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return isLg;
+}
 
 export default function PeoplePage() {
   const [meta, setMeta] = useState({
@@ -22,6 +35,7 @@ export default function PeoplePage() {
   const [err, setErr] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const isLg = useIsLg();
 
   useEffect(() => {
     let live = true;
@@ -57,7 +71,8 @@ export default function PeoplePage() {
     });
   }, [people]);
 
-const goHome = () => navigate("/#home");
+  // Always go home (top of landing page). Navbar will handle section nav.
+  const goHome = () => navigate("/");
 
   return (
     <>
@@ -95,64 +110,91 @@ const goHome = () => navigate("/#home");
         {err && <p className="text-red-600">{err}</p>}
 
         {!loading && !err && (
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 auto-rows-[220px] md:auto-rows-[260px]">
+          <div
+            className="
+              grid gap-4
+              grid-cols-1 sm:grid-cols-2 lg:grid-cols-4
+              auto-rows-[auto] sm:auto-rows-[220px] md:auto-rows-[260px]
+            "
+          >
             {sorted.map((m, idx) => {
               const cs = clamp(m.colSpan ?? 1, 1, 4);
               const rs = clamp(m.rowSpan ?? 1, 1, 8);
               const cStart = m.colStart ? clamp(m.colStart, 1, 4) : null;
               const rStart = m.rowStart ? clamp(m.rowStart, 1, 50) : null;
-              const style = {
-                gridColumn: cStart ? `${cStart} / span ${cs}` : `span ${cs} / span ${cs}`,
-                gridRow: rStart ? `${rStart} / span ${rs}` : `span ${rs} / span ${rs}`,
-              };
-              const key = m._key || m.slug?.current || `${m.name || "person"}-${idx}`;
 
-              // If slug is missing, make the card non-clickable
-              const content = (
+              // Apply spans ONLY on large screens so mobile stays uniform
+              const style = isLg
+                ? {
+                    gridColumn: cStart ? `${cStart} / span ${cs}` : `span ${cs} / span ${cs}`,
+                    gridRow: rStart ? `${rStart} / span ${rs}` : `span ${rs} / span ${rs}`,
+                  }
+                : undefined;
+
+              const key = m._key || m.slug?.current || `${m.name || "person"}-${idx}`;
+              const photoUrl = m.photo
+                ? urlFor(m.photo).width(isLg ? 800 : 700).height(isLg ? 800 : 525).fit("crop").auto("format").url()
+                : null;
+
+              const CardInner = (
                 <>
-                  <div className="absolute top-0 right-0 w-1/2 h-1/2">
-                    {m.photo ? (
-                      <img
-                        src={urlFor(m.photo).width(800).height(800).fit("crop").auto("format").url()}
-                        alt={m.name || "Member"}
-                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-100" />
-                    )}
+                  {/* MOBILE: vertical card (image on top) */}
+                  <div className="sm:hidden">
+                    <div className="w-full aspect-[4/3] overflow-hidden bg-gray-100">
+                      {photoUrl && (
+                        <img
+                          src={photoUrl}
+                          alt={m.name || "Member"}
+                          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition"
+                          loading="lazy"
+                        />
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-lg">{m.name || "—"}</h3>
+                      {m.role && <p className="text-sm text-slate-600">{m.role}</p>}
+                    </div>
                   </div>
 
-                  <div className="absolute bottom-6 left-6 pr-6">
-                    <h3 className="font-bold leading-tight text-lg md:text-xl group-hover:text-blue-600">
-                      {m.name || "—"}
-                    </h3>
-                    {m.role && (
-                      <p className="text-sm text-gray-600 group-hover:text-blue-500">
-                        {m.role}
-                      </p>
-                    )}
+                  {/* DESKTOP/TABLET: your diagonal layout */}
+                  <div className="hidden sm:block h-full">
+                    <div className="absolute top-0 right-0 w-1/2 h-1/2">
+                      {photoUrl ? (
+                        <img
+                          src={photoUrl}
+                          alt={m.name || "Member"}
+                          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-100" />
+                      )}
+                    </div>
+
+                    <div className="absolute bottom-6 left-6 pr-6">
+                      <h3 className="font-bold leading-tight text-lg md:text-xl group-hover:text-blue-600">
+                        {m.name || "—"}
+                      </h3>
+                      {m.role && (
+                        <p className="text-sm text-gray-600 group-hover:text-blue-500">
+                          {m.role}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </>
               );
 
+              const baseClasses =
+                "relative group bg-white border border-gray-200 rounded-xl overflow-hidden text-left transition shadow-sm hover:shadow-md h-full";
+
               return m.slug?.current ? (
-                <Link
-                  key={key}
-                  to={`/people/${m.slug.current}`}
-                  style={style}
-                  className="relative group block bg-white border border-gray-200 rounded-xl overflow-hidden text-left transition shadow-sm hover:shadow-md h-full"
-                >
-                  {content}
+                <Link key={key} to={`/people/${m.slug.current}`} style={style} className={`block ${baseClasses}`}>
+                  {CardInner}
                 </Link>
               ) : (
-                <div
-                  key={key}
-                  style={style}
-                  className="relative group bg-white border border-gray-200 rounded-xl overflow-hidden text-left h-full opacity-75"
-                  title="Missing slug"
-                >
-                  {content}
+                <div key={key} style={style} className={`${baseClasses} opacity-75`} title="Missing slug">
+                  {CardInner}
                 </div>
               );
             })}

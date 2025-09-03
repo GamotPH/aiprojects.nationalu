@@ -66,13 +66,13 @@ function PaperModal({ paper, onClose }) {
         )}
 
         <div className="p-6 space-y-6">
-          <div>
+          {/* <div>
             <p className="text-sm text-gray-600">
               {[paper.authors, paper.venue, fmt(paper.date)]
                 .filter(Boolean)
                 .join(" · ")}
             </p>
-          </div>
+          </div> */}
 
           <div>
             <h3 className="font-semibold text-lg mb-2">Citation</h3>
@@ -82,7 +82,7 @@ function PaperModal({ paper, onClose }) {
           {paper.excerpt && (
             <div>
               <h3 className="font-semibold text-lg mb-2">Abstract</h3>
-              <p className="text-gray-800 whitespace-pre-wrap">{paper.excerpt}</p>
+              <p className="text-gray-800 whitespace-pre-wrap text-justify">{paper.excerpt}</p>
             </div>
           )}
 
@@ -168,58 +168,70 @@ export default function PapersSection({ items }) {
         </header>
 
       {papers.length === 0 ? (
-        <p className="text-gray-600">No papers yet.</p>
-      ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {papers.map((p, i) => (
-            <button
-              key={i}
-              onClick={() => openPaper(p)}
-              className="text-left bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden group"
+  <p className="text-gray-600">No papers yet.</p>
+) : (
+  <div className="flex flex-col gap-4">
+    {papers.map((p, i) => {
+      const citation =
+        p.citation ||
+        [p.authors, p.title, p.venue, yearOf(p.date)].filter(Boolean).join(". ");
+
+    return (
+      <article
+        key={i}
+        className="w-full rounded-2xl bg-white shadow p-6 hover:shadow-md transition"
+      >
+        {/* Title */}
+        <h3 className="text-lg md:text-xl font-semibold">
+          {p.title || "Untitled paper"}
+        </h3>
+
+        {/* Citation line: authors · venue · date */}
+        {/* <p className="mt-1 text-sm text-gray-600">
+          {[p.authors, p.venue, fmt(p.date)].filter(Boolean).join(" · ")}
+        </p> */}
+
+        {/* Full citation paragraph (optional; keep or remove) */}
+        <p className="mt-3 text-gray-800">{citation}</p>
+
+        {/* Links */}
+        <div className="mt-4 flex flex-wrap gap-6">
+          {p.link && (
+            <a
+              href={p.link}
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-600 hover:underline"
             >
-              {p.coverUrl ? (
-                <div className="h-40 w-full overflow-hidden">
-                  <img
-                    src={p.coverUrl}
-                    alt={p.title || "Paper cover"}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    loading="lazy"
-                  />
-                </div>
-              ) : (
-                <div className="h-40 w-full bg-gray-100" />
-              )}
+              View online →
+            </a>
+          )}
+          {p.pdfUrl && (
+            <a
+              href={p.pdfUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-600 hover:underline"
+            >
+              PDF ↗
+            </a>
+          )}
 
-              <div className="p-5">
-                <h3 className="font-semibold text-lg line-clamp-2">
-                  {p.title || "Untitled paper"}
-                </h3>
-                <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                  {[p.authors, p.venue, yearOf(p.date)].filter(Boolean).join(" · ")}
-                </p>
-
-                {p.excerpt && (
-                  <p className="text-gray-700 mt-3 line-clamp-3">{p.excerpt}</p>
-                )}
-
-                <div className="mt-4 flex items-center gap-3">
-                  {p.featured && (
-                    <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-xs">
-                      Featured
-                    </span>
-                  )}
-                  <span className="ml-auto text-blue-600 group-hover:underline">
-                    View details →
-                  </span>
-                </div>
-              </div>
-            </button>
-          ))}
+          {/* Optional: keep a Details link to open the existing modal */}
+          <button
+            type="button"
+            onClick={() => openPaper(p)}
+            className="text-blue-600 hover:underline"
+          >
+            Details
+          </button>
         </div>
-      )}
-
-      {/* Modal */}
-      <PaperModal paper={active} onClose={closePaper} />
+      </article>
+    );})}
+  </div>
+)}
+{/* Modal stays available */}
+<PaperModal paper={active} onClose={closePaper} />
     </section>
   );
 }

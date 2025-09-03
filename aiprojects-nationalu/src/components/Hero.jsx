@@ -18,6 +18,43 @@ export default function Hero({
   bgImage3 = bg3,
   hideRobot = false,
 }) {
+  // match navbar offset so the scrolled-to section isn't hidden
+  const HEADER_H = 80; // h-20
+  const PAD = 24;
+  const offset = HEADER_H + PAD;
+
+  const handleCta = (e) => {
+    if (!ctaHref) return;
+
+    // If the href is "/#something", let the browser do a normal navigation
+    if (ctaHref.startsWith("/#")) return;
+
+    // Only intercept bare "#id" anchors
+    if (ctaHref.startsWith("#")) {
+      e.preventDefault();
+      const id = ctaHref.slice(1);
+
+      const hash = window.location.hash || "";
+      const onHashRouterSubpage = hash.startsWith("#/");
+
+      // If we're already on the landing page, smooth-scroll with offset
+      if (!onHashRouterSubpage || hash === "" || hash === "#home" || hash === "#/") {
+        const el = document.getElementById(id);
+        if (el) {
+          const y = window.scrollY + el.getBoundingClientRect().top - offset;
+          window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+          return;
+        }
+        // Fallback: set hash so it scrolls once the element exists
+        window.location.hash = `#${id}`;
+        return;
+      }
+
+      // If we're on another route (e.g. #/people), go to home + anchor
+      window.location.href = `/#${id}`;
+    }
+  };
+
   return (
     <section
       id="home"
@@ -65,6 +102,7 @@ export default function Hero({
             {ctaText && (
               <a
                 href={ctaHref}
+                onClick={handleCta}
                 className="inline-block mt-8 rounded-lg bg-white px-6 py-3 font-semibold text-nu-blue shadow hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
               >
                 {ctaText}
@@ -73,27 +111,39 @@ export default function Hero({
           </div>
 
           {!hideRobot && (
-           <div className="xl:hidden mt-4 sm:mt-6 md:mt-8 flex justify-center">
-             <img
-               src={robotGif}
-               alt=""
-               className="pointer-events-none select-none block h-auto w-[min(420px,70vw)] sm:w-[min(460px,60vw)] md:w-[min(520px,55vw)] drop-shadow-2xl rounded-xl"
-               draggable="false"
-             />
-           </div>
-         )}
+            <div className="xl:hidden mt-4 sm:mt-6 md:mt-8 flex justify-center">
+              <img
+                src={robotGif}
+                alt=""
+                className="pointer-events-none select-none block h-auto
+                           w-[min(420px,70vw)] sm:w-[min(460px,60vw)] md:w-[min(520px,55vw)]
+                           drop-shadow-2xl rounded-xl"
+                draggable="false"
+              />
+            </div>
+          )}
         </div>
       </div>
 
       {/* OVERLAY robot — only when there’s ample width (≥1280px), so it never hits the text */}
       {!hideRobot && (
-       <figure
-         className="hidden xl:block absolute bottom-45 right-12 z-[2] w-[clamp(260px,28vw,520px)] pointer-events-none select-none"
-         aria-hidden="true"
-       >
-         <img src={robotGif} alt="" className="block w-full h-auto drop-shadow-2xl rounded-xl" draggable="false" />
-       </figure>
-     )}
+        <figure
+          className="
+            hidden xl:block
+            absolute bottom-45 right-12 z-[2]
+            w-[clamp(260px,28vw,520px)]
+            pointer-events-none select-none
+          "
+          aria-hidden="true"
+        >
+          <img
+            src={robotGif}
+            alt=""
+            className="block w-full h-auto drop-shadow-2xl rounded-xl"
+            draggable="false"
+          />
+        </figure>
+      )}
     </section>
   );
 }

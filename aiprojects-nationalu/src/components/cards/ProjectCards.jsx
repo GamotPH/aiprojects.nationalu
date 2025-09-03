@@ -22,19 +22,27 @@ export default function ProjectCard({
   return (
     <article
       className={[
-        // ✅ Uniform width + height (adjust numbers to taste)
-        "w-[360px] sm:w-[380px] lg:w-[396px]",
-        "h-[520px] sm:h-[540px] lg:h-[560px]",
-        "group rounded-2xl border border-slate-100 bg-white shadow-sm",
+        // Fill the grid column and keep consistent height
+        "w-full h-full",
+        "min-h-[520px] sm:min-h-[540px] lg:min-h-[560px]",
+        // Card chrome
+        "group rounded-2xl bg-white shadow-sm border border-slate-100",
         "transition-all duration-300 hover:-translate-y-1 hover:shadow-lg",
         "overflow-hidden flex flex-col",
+        // Better keyboard focus
+        "focus-within:ring-2 focus-within:ring-nu-blue/30",
         className,
       ].join(" ")}
     >
-      {/* Top image area (uniform height) */}
+      {/* Top image */}
       <div className="relative">
         {imageUrl ? (
-          <img src={imageUrl} alt={title} className="h-48 w-full object-cover" />
+          <img
+            src={imageUrl}
+            alt={title || "Project image"}
+            className="h-48 w-full object-cover"
+            loading="lazy"
+          />
         ) : (
           <div className="h-48 w-full bg-slate-100" />
         )}
@@ -67,18 +75,20 @@ export default function ProjectCard({
         </div>
 
         {/* Tags */}
-        {!!tags?.length && (
-          <ul className="mt-1 flex flex-wrap gap-2">
-            {tags.map((t, idx) => (
-              <li
-                key={`${t}-${idx}`}
-                className="text-xs rounded-full bg-slate-100 text-slate-700 px-2.5 py-1"
-              >
-                {t}
-              </li>
-            ))}
-          </ul>
-        )}
+{!!tags?.length && (
+  <ul className="mt-1 flex flex-wrap gap-2 min-h-[44px]">  {/* reserve space */}
+    {tags.slice(0, 3).map((t, idx) => (
+      <li
+        key={`${t}-${idx}`}
+        className="inline-flex items-center h-7 px-3 rounded-full bg-slate-100 text-slate-700 text-xs font-medium leading-none whitespace-nowrap"
+        title={t?.trim?.() || t}
+      >
+        {(t?.trim?.() ?? t) || ""}
+      </li>
+    ))}
+  </ul>
+)}
+
 
         {/* Spacer pushes button to bottom */}
         <div className="flex-1" />
@@ -89,7 +99,8 @@ export default function ProjectCard({
             href={href || "#"}
             target={href ? "_blank" : undefined}
             rel={href ? "noopener noreferrer" : undefined}
-            className="block w-full text-center rounded-lg bg-white text-nu-blue font-medium border border-slate-200 shadow-sm px-4 py-2.5 hover:bg-slate-50 hover:border-slate-300 transition-colors"
+            className="block w-full text-center rounded-lg bg-white text-nu-blue font-medium border border-slate-200 shadow-sm px-4 py-2.5 hover:bg-slate-50 hover:border-slate-300 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-nu-blue/40"
+            aria-label={title ? `Open ${title}` : "Open project"}
           >
             Live View
           </a>

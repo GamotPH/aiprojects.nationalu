@@ -9,7 +9,6 @@ import Highlights from "./components/Highlights.jsx";
 import SDG from "./components/SDG.jsx";
 import Collaborate from "./components/Collaborate.jsx";
 import PapersSection from "./components/PapersSection.jsx";
-import PeopleSection from "./components/PeopleSection.jsx";
 
 export default function App() {
   const [data, setData] = useState(null);

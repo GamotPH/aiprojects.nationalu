@@ -17,33 +17,35 @@ export async function fetchLandingPage() {
     heroCtaText, heroCtaHref,
     projects[]{
       title, subtitle, summary, tags, href,
-      "imageUrl": image.asset->url
+      "slug": slug.current,
+      "imageUrl": image.asset->url,
+      about,
+      articles[]{
+        title, date, excerpt, content, cover,
+        "coverUrl": image.asset->url,
+        "slug": slug.current,
+        gallery[]{ "url": image.asset->url, caption }
+      },
+      links[]{ label, url },
+      partners[]{ name, href, "logoUrl": logo.asset->url }
     },
     highlights[]{ title, body, "iconUrl": icon.asset->url },
     applications[]{ title, body, "iconUrl": icon.asset->url },
-    sdgs[]{
-  "iconUrl": icon.asset->url,
-  "iconAlt": icon.alt,
-  blurb
-},
-  // >>> People (sorted by 'order' then name)
+    sdgs[]{ "iconUrl": icon.asset->url, "iconAlt": icon.alt, blurb },
     "people": people[] | order(coalesce(order, 1e9) asc, name asc){
       name, role, bio, email, linkedin, order,
       "photoUrl": photo.asset->url
     },
-
-    // >>> Publications (sorted by date desc)
     papers[] | order(date desc){
       title, authors, date, venue, excerpt, link, featured, citation, slug,
       "coverUrl": coverImage.asset->url,
       "pdfUrl": pdf.asset->url
     },
     "teamLab": teamLab[] | order(displayOrder asc){
-  _key,
-  name, role, slug, overviewTitle, overviewText,
-  colSpan, rowSpan, colStart, rowStart, displayOrder,
-  "photo": image
-},
+      _key, name, role, slug, overviewTitle, overviewText,
+      colSpan, rowSpan, colStart, rowStart, displayOrder,
+      "photo": image
+    },
     partners[]{ name, href, "logoUrl": logo.asset->url },
     collabTitle, collabBody, contactEmail,
     footerNote

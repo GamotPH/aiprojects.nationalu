@@ -1,5 +1,6 @@
 // components/cards/ProjectCards.jsx
 import React from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 /** Split the title so the first word can be bolded/colored */
 function splitTitle(text = "") {
@@ -13,29 +14,73 @@ export default function ProjectCard({
   title = "",
   subtitle = "",
   tags = [],
-  href = "#",           // e.g. https://gamotph.aiproject-nationalu.com
+  href = "",           // external URL from Sanity (preferred if present)
+  slug,                // string or { current }
   imageUrl,
   className = "",
-  newTab = false,       // set true if you want it to open in a new tab
+  newTab = true,       // open EXTERNAL links in a new tab by default
 }) {
+  const navigate = useNavigate();
   const [first, rest] = splitTitle(title);
-  const target = newTab ? "_blank" : undefined;
-  const rel = newTab ? "noopener noreferrer" : undefined;
+
+  // Resolve slug robustly (string or {current}); leave undefined if missing
+  const effectiveSlug =
+    typeof slug === "string" ? slug : slug?.current ? slug.current : undefined;
+
+  // Decide link target: prefer EXTERNAL if provided, else INTERNAL
+  const hasExternal = !!href && href !== "#" && href.trim() !== "";
+  const internalTo = effectiveSlug ? `/projects/${effectiveSlug}` : undefined;
+
+  const linkClass = [
+    "group block w-full h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-nu-blue/40",
+    className,
+  ].join(" ");
+
+  const ariaBase = title ? `Open ${title}` : "Open project";
+  const aria = hasExternal ? `${ariaBase} (external)` : ariaBase;
+
+  // Fallback click (only kicks in if we're NOT rendering <a> or <Link>)
+  const handleArticleClick = (e) => {
+    if (!hasExternal && internalTo) {
+      navigate(internalTo);
+    }
+  };
+
+  // Wrapper chooses <a> (external) or <Link> (internal) or <div> (no link)
+  const Wrapper = ({ children }) =>
+    hasExternal ? (
+      <a
+        href={href}
+        target={newTab ? "_blank" : undefined}
+        rel={newTab ? "noopener noreferrer" : undefined}
+        aria-label={aria}
+        className={linkClass}
+        title={href}
+        data-link-type="external"
+      >
+        {children}
+      </a>
+    ) : internalTo ? (
+      <Link
+        to={internalTo}
+        aria-label={aria}
+        className={linkClass}
+        data-link-type="internal"
+      >
+        {children}
+      </Link>
+    ) : (
+      <div className={linkClass} aria-label="No link available" data-link-type="none">
+        {children}
+      </div>
+    );
 
   return (
-    <a
-      href={href || "#"}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={title ? `Open ${title}` : "Open project"}
-      className={[
-        "group block w-full h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-nu-blue/40",
-        className,
-      ].join(" ")}
-    >
+    <Wrapper>
       <article
+        onClick={handleArticleClick}
         className={[
-          "w-full h-full",
+          "w-full h-full cursor-pointer",
           "relative rounded-2xl bg-white shadow-sm border border-slate-100",
           "transition-all duration-300 hover:-translate-y-1 hover:shadow-lg",
           "overflow-hidden flex flex-col",
@@ -99,9 +144,9 @@ export default function ProjectCard({
           <div className="flex-1" />
         </div>
 
-        {/* Invisible overlay ensures any click triggers the link (not strictly necessary, but nice) */}
+        {/* Invisible overlay ensures any click triggers the link (within Wrapper) */}
         <span className="absolute inset-0" aria-hidden="true" />
       </article>
-    </a>
+    </Wrapper>
   );
 }

@@ -6,15 +6,17 @@ import "./index.css";
 
 import App from "./App.jsx";              
 import People from "./components/People.jsx";
-import PersonDetail from "./components/PersonDetail.jsx";   
+import PersonDetail from "./components/PersonDetail.jsx";
+import ProjectDetails from "./components/ProjectDetails.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <HashRouter>
       <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/people" element={<People />} />
-        <Route path="/people/:slug" element={<PersonDetail />} />
+        <Route index element={<App />} />
+        <Route path="people" element={<People />} />
+        <Route path="people/:slug" element={<PersonDetail />} />
+        <Route path="/projects/:slug/*" element={<ProjectDetails />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </HashRouter>

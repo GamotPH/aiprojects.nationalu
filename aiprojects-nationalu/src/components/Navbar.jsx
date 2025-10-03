@@ -78,14 +78,18 @@ const goTo = (id) => (e) => {
     const lastId = sectionIds[sectionIds.length - 1];
 
     const checkRouteFirst = () => {
-      const h = window.location.hash || "";
-      // When on a routed page (HashRouter), hash looks like "#/people"
-      if (h.startsWith("#/people")) {
-        if (activeRef.current !== "people") setActive("people");
-        return true; // skip section spy
-      }
-      return false;
-    };
+    const path = location.pathname || "";
+    // When on routed pages, lock the active tab to that section
+    if (path.startsWith("/projects")) {
+      if (activeRef.current !== "projects") setActive("projects");
+      return true; // skip section spy on landing
+    }
+    if (path.startsWith("/people")) {
+      if (activeRef.current !== "people") setActive("people");
+      return true;
+    }
+    return false;
+  };
 
     const spy = () => {
       if (checkRouteFirst()) return;
@@ -142,8 +146,7 @@ const goTo = (id) => (e) => {
       window.removeEventListener("load", spy);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [links.map(l => l.id).join("|")]);
-
+  }, [links.map(l => l.id).join("|"), location.pathname]);
   // ---------- Sticky bar slide/blur ----------
   useEffect(() => {
     const START_OFFSET = 80;

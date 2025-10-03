@@ -1,6 +1,10 @@
 // components/Projects.jsx
 import ProjectCard from "./cards/ProjectCards";
 
+// add this helper (or import one if you already have it)
+const slugify = (s = "") =>
+  s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
 export default function Projects({ items = [] }) {
   const len = items.length;
 
@@ -26,22 +30,24 @@ export default function Projects({ items = [] }) {
                 {items.map((p, i) => {
                   const isLast = i === len - 1;
 
-                  // Center lone last card on 2-col layouts only.
-                  // Revert at lg so 3-up works when the screen allows it.
                   const centerOn2Col =
                     isLast && len % 2 === 1
                       ? "sm:col-span-2 sm:flex sm:justify-center lg:col-span-1 lg:justify-self-auto"
                       : "";
 
-                  // Keep same visual width as a normal column on 2-col; cancel at lg.
                   const innerWidth =
                     isLast && len % 2 === 1
                       ? "sm:w-[calc(50%-1rem)] md:w-[calc(50%-1rem)] lg:w-auto"
                       : "";
 
-                  // On 3-col layouts, if there's a single leftover, put it in the middle.
                   const centerOn3Col =
                     isLast && len % 3 === 1 ? "lg:col-start-2" : "";
+
+                  const slug =
+                    (typeof p.slug === "string" && p.slug) ||
+                    (p.slug?.current) ||
+                    slugify(p.title || `project-${i}`);
+
 
                   return (
                     <div key={p._id || i} className={`h-full ${centerOn2Col} ${centerOn3Col}`}>
@@ -54,6 +60,7 @@ export default function Projects({ items = [] }) {
                           href={p.href}
                           imageUrl={p.imageUrl}
                           className="h-full"
+                          slug={slug}           
                         />
                       </div>
                     </div>

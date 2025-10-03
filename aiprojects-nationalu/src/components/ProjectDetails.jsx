@@ -839,32 +839,42 @@ useEffect(() => {
                   <p className="mt-2 text-slate-600">Project partners and supporters.</p>
 
                   {partners?.length ? (
-                    <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 items-center">
-                      {partners.map((org, i) => (
-                        <a
-                          key={org.name || i}
-                          href={org.href || undefined}
-                          target={org.href ? "_blank" : undefined}
-                          rel={org.href ? "noopener noreferrer" : undefined}
-                          className="group flex items-center justify-center rounded-xl border border-slate-100 bg-white p-4 shadow-sm hover:shadow-md transition"
-                        >
-                          {org.logoUrl ? (
-                            <img
-                              src={org.logoUrl}
-                              alt={org.name || "Partner"}
-                              className="h-12 w-auto object-contain opacity-90 group-hover:opacity-100"
-                            />
-                          ) : (
-                            <span className="text-sm text-slate-700">{org.name || "Partner"}</span>
-                          )}
-                        </a>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="mt-6 rounded-xl border border-dashed border-slate-200 p-6 text-slate-600">
-                      No partners listed yet.
-                    </div>
-                  )}
+  <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-10 gap-y-8 place-items-center">
+    {partners
+      .filter((org) => org.logoUrl) // logos only
+      .map((org, i) => {
+        const img = (
+          <img
+            src={org.logoUrl}
+            alt={org.name || "Partner"}
+            className="mx-auto h-14 md:h-16 lg:h-20 w-auto object-contain max-w-[180px]" // uniform size
+            loading="lazy"
+          />
+        );
+        return org.href ? (
+          <a
+            key={org.name || i}
+            href={org.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block"
+            title={org.name || undefined}
+          >
+            {img}
+          </a>
+        ) : (
+          <div key={org.name || i} className="block">
+            {img}
+          </div>
+        );
+      })}
+  </div>
+) : (
+  <div className="mt-6 rounded-xl border border-dashed border-slate-200 p-6 text-slate-600">
+    No partners listed yet.
+  </div>
+)}
+
                 </div>
               </section>
             </>

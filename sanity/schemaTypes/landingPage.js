@@ -256,7 +256,6 @@ export default {
           { name: "rowSpan", title: "Row Span (1–7)", type: "number" },
           { name: "colStart", title: "Column Start (Optional)", type: "number" },
           { name: "rowStart", title: "Row Start (Optional)", type: "number" },
-          { name: "displayOrder", title: "Display Order", type: "number", validation: R => R.required().min(0) },
           { name: "slug", title: "Slug", type: "slug", options: { source: "name", maxLength: 96 }, validation: R => R.required() },
           { name: "overviewTitle", title: "Overview Title", type: "string" },
           { name: "overviewText", title: "Overview Text", type: "text" }

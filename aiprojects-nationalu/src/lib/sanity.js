@@ -32,7 +32,7 @@ export async function fetchLandingPage() {
     highlights[]{ title, body, "iconUrl": icon.asset->url },
     applications[]{ title, body, "iconUrl": icon.asset->url },
     sdgs[]{ "iconUrl": icon.asset->url, "iconAlt": icon.alt, blurb },
-    "people": people[] | order(coalesce(order, 1e9) asc, name asc){
+    "people": people[]{
       name, role, bio, email, linkedin, order,
       "photoUrl": photo.asset->url
     },
@@ -41,9 +41,9 @@ export async function fetchLandingPage() {
       "coverUrl": coverImage.asset->url,
       "pdfUrl": pdf.asset->url
     },
-    "teamLab": teamLab[] | order(displayOrder asc){
+    "teamLab": teamLab[] {
       _key, name, role, slug, overviewTitle, overviewText,
-      colSpan, rowSpan, colStart, rowStart, displayOrder,
+      colSpan, rowSpan, colStart, rowStart,
       "photo": image
     },
     partners[]{ name, href, "logoUrl": logo.asset->url },

@@ -62,14 +62,7 @@ export default function PeoplePage() {
     return () => { live = false; };
   }, []);
 
-  const sorted = useMemo(() => {
-    return [...people].sort((a, b) => {
-      const ao = Number.isFinite(a?.displayOrder) ? a.displayOrder : 1e9;
-      const bo = Number.isFinite(b?.displayOrder) ? b.displayOrder : 1e9;
-      if (ao !== bo) return ao - bo;
-      return (a?.name || "").localeCompare(b?.name || "");
-    });
-  }, [people]);
+  const ordered = useMemo(() => people ?? [], [people]);
 
   // Always go home (top of landing page). Navbar will handle section nav.
   const goHome = () => navigate("/");
@@ -117,7 +110,7 @@ export default function PeoplePage() {
               auto-rows-[auto] sm:auto-rows-[220px] md:auto-rows-[260px]
             "
           >
-            {sorted.map((m, idx) => {
+            {ordered.map((m, idx) => {
               const cs = clamp(m.colSpan ?? 1, 1, 4);
               const rs = clamp(m.rowSpan ?? 1, 1, 8);
               const cStart = m.colStart ? clamp(m.colStart, 1, 4) : null;
@@ -131,7 +124,7 @@ export default function PeoplePage() {
                   }
                 : undefined;
 
-              const key = m._key || m.slug?.current || `${m.name || "person"}-${idx}`;
+              const key = m._key ?? m.slug?.current ?? m._id ?? m.name;
               const photoUrl = m.photo
                 ? urlFor(m.photo).width(isLg ? 800 : 700).height(isLg ? 800 : 525).fit("crop").auto("format").url()
                 : null;

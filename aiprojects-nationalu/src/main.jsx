@@ -8,6 +8,7 @@ import App from "./App.jsx";
 import People from "./components/People.jsx";
 import PersonDetail from "./components/PersonDetail.jsx";
 import ProjectDetails from "./components/ProjectDetails.jsx";
+import PolicyPage from "./components/PolicyPage";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -17,6 +18,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route path="people" element={<People />} />
         <Route path="people/:slug" element={<PersonDetail />} />
         <Route path="/projects/:slug/*" element={<ProjectDetails />} />
+        <Route path="/projects/:slug/policy" element={<PolicyPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </HashRouter>

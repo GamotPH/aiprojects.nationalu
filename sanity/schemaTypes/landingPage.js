@@ -48,6 +48,22 @@ export default {
             ]
           },
 
+          {
+            name: "privacyPolicy",
+            title: "Privacy Policy",
+            description: "Project-specific privacy policy text. Leave blank to hide the Policy section.",
+            type: "array",
+            of: [
+              { type: "block" },
+              {
+                type: "image",
+                options: { hotspot: true },
+                fields: [{ name: "alt", type: "string", title: "Alt text" }]
+              }
+            ]
+
+          },
+
           // Meta
           { name: "tags", type: "array", of: [{ type: "string" }] },
 

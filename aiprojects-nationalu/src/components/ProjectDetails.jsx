@@ -118,6 +118,11 @@ export default function ProjectDetails() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const isOnPolicyPage = (() => {
+  const parts = (location.hash || "").replace(/^#/, "").split("/").filter(Boolean);
+  return parts[0] === "projects" && parts[1] === slug && parts[2] === "policy";
+})();
+
 
   const [data, setData] = useState(null);
   const [err,  setErr]  = useState(null);
@@ -264,6 +269,13 @@ const articles = useMemo(() => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.key]);
+
+  useEffect(() => {
+  if (location.hash === "#policy") {
+    navigate(`/projects/${slug}/policy`, { replace: true });
+  }
+  }, [location.hash, navigate, slug]);
+
 
   // Keep "Articles" active when viewing list (not detail)
   useEffect(() => {
@@ -513,7 +525,7 @@ useEffect(() => {
                             { id: "articles", label: "Articles" },
                             { id: "partners", label: "Partners" },
                           ].map(({ id, label }) => {
-                            const isActive = currentTab === id;
+                            const isActive = (inArticleDetail ? "articles" : activeLocal) === id && !isOnPolicyPage;
                             return (
                               <a
                                 key={id}
@@ -535,6 +547,25 @@ useEffect(() => {
                               </a>
                             );
                           })}
+
+                          {/* Policy → route */}
+                          <a
+                            href={`#/projects/${slug}/policy`}
+                            className={[
+                              "relative pb-2 transition-colors",
+                              isOnPolicyPage ? "text-slate-900 font-semibold" : "text-slate-600 hover:text-slate-900",
+                            ].join(" ")}
+                            aria-current={isOnPolicyPage ? "page" : undefined}
+                          >
+                            Policy
+                            <span
+                              className={[
+                                "pointer-events-none absolute left-1/2 -translate-x-1/2 -bottom-0.5 h-0.5 rounded-full transition-all duration-200",
+                                isOnPolicyPage ? "w-8 bg-nu-blue" : "w-0 bg-slate-300",
+                              ].join(" ")}
+                            />
+                          </a>
+
 
                           <div className="ml-auto">
                             <button
@@ -839,44 +870,45 @@ useEffect(() => {
                   <p className="mt-2 text-slate-600">Project partners and supporters.</p>
 
                   {partners?.length ? (
-  <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-10 gap-y-8 place-items-center">
-    {partners
-      .filter((org) => org.logoUrl) // logos only
-      .map((org, i) => {
-        const img = (
-          <img
-            src={org.logoUrl}
-            alt={org.name || "Partner"}
-            className="mx-auto h-14 md:h-16 lg:h-20 w-auto object-contain max-w-[180px]" // uniform size
-            loading="lazy"
-          />
-        );
-        return org.href ? (
-          <a
-            key={org.name || i}
-            href={org.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block"
-            title={org.name || undefined}
-          >
-            {img}
-          </a>
-        ) : (
-          <div key={org.name || i} className="block">
-            {img}
-          </div>
-        );
-      })}
-  </div>
-) : (
-  <div className="mt-6 rounded-xl border border-dashed border-slate-200 p-6 text-slate-600">
-    No partners listed yet.
-  </div>
-)}
+                    <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-10 gap-y-8 place-items-center">
+                      {partners
+                        .filter((org) => org.logoUrl) // logos only
+                        .map((org, i) => {
+                          const img = (
+                            <img
+                              src={org.logoUrl}
+                              alt={org.name || "Partner"}
+                              className="mx-auto h-14 md:h-16 lg:h-20 w-auto object-contain max-w-[180px]" // uniform size
+                              loading="lazy"
+                            />
+                          );
+                          return org.href ? (
+                            <a
+                              key={org.name || i}
+                              href={org.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block"
+                              title={org.name || undefined}
+                            >
+                              {img}
+                            </a>
+                          ) : (
+                            <div key={org.name || i} className="block">
+                              {img}
+                            </div>
+                          );
+                        })}
+                    </div>
+                  ) : (
+                    <div className="mt-6 rounded-xl border border-dashed border-slate-200 p-6 text-slate-600">
+                      No partners listed yet.
+                    </div>
+                  )}
 
                 </div>
               </section>
+
             </>
           )}
         </>

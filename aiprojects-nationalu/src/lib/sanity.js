@@ -20,6 +20,7 @@ export async function fetchLandingPage() {
       "slug": slug.current,
       "imageUrl": image.asset->url,
       about,
+      privacyPolicy,
       articles[]{
         title, date, excerpt, content, cover,
         "coverUrl": image.asset->url,

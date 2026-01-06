@@ -21,6 +21,19 @@ function useIsLg() {
   return isLg;
 }
 
+function generateAutoGridPositions(startRow = 3, columns = 4, maxRows = 20) {
+  const positions = [];
+
+  for (let row = startRow; row <= maxRows; row++) {
+    for (let col = 1; col <= columns; col++) {
+      positions.push({ col, row });
+    }
+  }
+
+  return positions;
+}
+
+
 export default function PeoplePage() {
   const [meta, setMeta] = useState({
     siteTitle: null,
@@ -63,6 +76,11 @@ export default function PeoplePage() {
   }, []);
 
   const ordered = useMemo(() => people ?? [], [people]);
+  const autoGridPositions = useMemo(
+  () => generateAutoGridPositions(3, 4, 20),
+  []
+);
+
 
   // Always go home (top of landing page). Navbar will handle section nav.
   const goHome = () => navigate("/");
@@ -111,18 +129,36 @@ export default function PeoplePage() {
             "
           >
             {ordered.map((m, idx) => {
-              const cs = clamp(m.colSpan ?? 1, 1, 4);
-              const rs = clamp(m.rowSpan ?? 1, 1, 8);
-              const cStart = m.colStart ? clamp(m.colStart, 1, 4) : null;
-              const rStart = m.rowStart ? clamp(m.rowStart, 1, 50) : null;
+              let style;
 
-              // Apply spans ONLY on large screens so mobile stays uniform
-              const style = isLg
-                ? {
-                    gridColumn: cStart ? `${cStart} / span ${cs}` : `span ${cs} / span ${cs}`,
-                    gridRow: rStart ? `${rStart} / span ${rs}` : `span ${rs} / span ${rs}`,
+              if (isLg) {
+                // FIRST 5 — use Sanity layout exactly
+                if (idx < 5) {
+                  const cs = clamp(m.colSpan ?? 1, 1, 4);
+                  const rs = clamp(m.rowSpan ?? 1, 1, 10);
+
+                  style = {
+                    gridColumn: m.colStart
+                      ? `${clamp(m.colStart, 1, 4)} / span ${cs}`
+                      : `span ${cs}`,
+                    gridRow: m.rowStart
+                      ? `${clamp(m.rowStart, 1, 50)} / span ${rs}`
+                      : `span ${rs}`,
+                  };
+                }
+
+                // REST — auto flow starting Column 1, Row 3
+                else {
+                  const pos = autoGridPositions[idx - 5];
+
+                  if (pos) {
+                    style = {
+                      gridColumn: `${pos.col} / span 1`,
+                      gridRow: `${pos.row} / span 1`,
+                    };
                   }
-                : undefined;
+                }
+              }
 
               const key = m._key ?? m.slug?.current ?? m._id ?? m.name;
               const photoUrl = m.photo

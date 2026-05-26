@@ -165,8 +165,8 @@ export default function PeoplePage() {
                 ? urlFor(m.photo).width(isLg ? 800 : 700).height(isLg ? 800 : 525).fit("crop").auto("format").url()
                 : null;
               const pastMemberBadge = m.isPastMember ? (
-                <span className="absolute right-2 top-2 z-10 rounded-sm bg-black px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white shadow-sm ring-1 ring-white/80 sm:right-3 sm:top-3 sm:text-sm">
-                  Past member
+                <span className="absolute left-0 top-0 z-10 bg-black px-2 py-1 text-[10px] font-bold uppercase leading-none tracking-wide text-white shadow-sm ring-1 ring-white/80 sm:text-[11px]">
+                  Former member
                 </span>
               ) : null;
 

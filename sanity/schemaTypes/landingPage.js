@@ -269,10 +269,10 @@ export default {
           { name: "role", title: "Role", type: "string" },
           {
             name: "isPastMember",
-            title: "Past member",
+            title: "Former member",
             type: "boolean",
             initialValue: false,
-            description: "Show a Past member badge on this person's People card."
+            description: "Show a Former member badge on this person's People card."
           },
           { name: "image", title: "Image", type: "image", options: { hotspot: true } },
           { name: "colSpan", title: "Column Span (1–4)", type: "number" },

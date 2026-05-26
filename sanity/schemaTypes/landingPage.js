@@ -267,6 +267,13 @@ export default {
         fields: [
           { name: "name", title: "Full Name", type: "string", validation: R => R.required() },
           { name: "role", title: "Role", type: "string" },
+          {
+            name: "isPastMember",
+            title: "Past member",
+            type: "boolean",
+            initialValue: false,
+            description: "Show a Past member badge on this person's People card."
+          },
           { name: "image", title: "Image", type: "image", options: { hotspot: true } },
           { name: "colSpan", title: "Column Span (1–4)", type: "number" },
           { name: "rowSpan", title: "Row Span (1–7)", type: "number" },

@@ -9,12 +9,14 @@ import People from "./components/People.jsx";
 import PersonDetail from "./components/PersonDetail.jsx";
 import ProjectDetails from "./components/ProjectDetails.jsx";
 import PolicyPage from "./components/PolicyPage";
+import NICERPage from "./components/NICERPage.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <HashRouter>
       <Routes>
         <Route index element={<App />} />
+        <Route path="nicer" element={<NICERPage />} />
         <Route path="people" element={<People />} />
         <Route path="people/:slug" element={<PersonDetail />} />
         <Route path="/projects/:slug/*" element={<ProjectDetails />} />

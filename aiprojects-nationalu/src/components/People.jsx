@@ -164,12 +164,18 @@ export default function PeoplePage() {
               const photoUrl = m.photo
                 ? urlFor(m.photo).width(isLg ? 800 : 700).height(isLg ? 800 : 525).fit("crop").auto("format").url()
                 : null;
+              const pastMemberBadge = m.isPastMember ? (
+                <span className="absolute right-2 top-2 z-10 rounded-sm bg-black px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white shadow-sm ring-1 ring-white/80 sm:right-3 sm:top-3 sm:text-sm">
+                  Past member
+                </span>
+              ) : null;
 
               const CardInner = (
                 <>
                   {/* MOBILE: vertical card (image on top) */}
                   <div className="sm:hidden">
-                    <div className="w-full aspect-[4/3] overflow-hidden bg-gray-100">
+                    <div className="relative w-full aspect-[4/3] overflow-hidden bg-gray-100">
+                      {pastMemberBadge}
                       {photoUrl && (
                         <img
                           src={photoUrl}
@@ -188,6 +194,7 @@ export default function PeoplePage() {
                   {/* DESKTOP/TABLET: your diagonal layout */}
                   <div className="hidden sm:block h-full">
                     <div className="absolute top-0 right-0 w-1/2 h-1/2">
+                      {pastMemberBadge}
                       {photoUrl ? (
                         <img
                           src={photoUrl}

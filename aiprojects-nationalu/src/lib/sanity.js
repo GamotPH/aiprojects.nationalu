@@ -44,6 +44,7 @@ export async function fetchLandingPage() {
     },
     "teamLab": teamLab[] {
       _key, name, role, slug, overviewTitle, overviewText,
+      isPastMember,
       colSpan, rowSpan, colStart, rowStart,
       "photo": image
     },

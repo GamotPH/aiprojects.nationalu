@@ -16,6 +16,7 @@ export default function Navbar({
   const links = useMemo(
     () => [
       { id: "research",    label: "Research",            type: "hash"  },
+      { id: "nicer",       label: "NICER",               type: "route", to: "/nicer" },
       { id: "projects",    label: "Projects",            type: "hash"  },
       { id: "sdgs",        label: "SDGs",                type: "hash"  },
       { id: "papers",      label: "Papers",              type: "hash"  },
@@ -86,6 +87,10 @@ const goTo = (id) => (e) => {
     }
     if (path.startsWith("/people")) {
       if (activeRef.current !== "people") setActive("people");
+      return true;
+    }
+    if (path.startsWith("/nicer")) {
+      if (activeRef.current !== "nicer") setActive("nicer");
       return true;
     }
     return false;

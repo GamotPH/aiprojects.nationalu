@@ -297,7 +297,7 @@ export default function NICERPage() {
         </div>
       </section>
 
-      <Section eyebrow="Context" title="The Healthcare AI Challenge">
+      <Section title="The Healthcare AI Challenge">
         <p>The future of healthcare will not be determined solely by hospitals, medicines, or medical devices.</p>
         <p>It will increasingly be shaped by:</p>
         <BulletList items={lists.futureDrivers} />

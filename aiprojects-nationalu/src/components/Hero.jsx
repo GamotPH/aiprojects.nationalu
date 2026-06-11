@@ -23,35 +23,49 @@ export default function Hero({
   const PAD = 24;
   const offset = HEADER_H + PAD;
 
+  const scrollToSection = (id) => {
+    const el = document.getElementById(id);
+    if (!el) return false;
+    const y = window.scrollY + el.getBoundingClientRect().top - offset;
+    window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+    return true;
+  };
+
+  const goToAnchor = (id) => {
+    const hash = window.location.hash || "";
+    const onHashRouterSubpage = hash.startsWith("#/");
+
+    if (scrollToSection(id)) return;
+
+    if (!onHashRouterSubpage || hash === "" || hash === "#home" || hash === "#/") {
+      window.location.hash = `#${id}`;
+      return;
+    }
+
+    window.location.href = `${window.location.origin}/#${id}`;
+  };
+
   const handleCta = (e) => {
     if (!ctaHref) return;
 
-    // If the href is "/#something", let the browser do a normal navigation
-    if (ctaHref.startsWith("/#")) return;
+    try {
+      const resolved = new URL(ctaHref, window.location.href);
+      const localHash = resolved.hash?.startsWith("#") ? resolved.hash.slice(1) : "";
+      const isRootHashLink = !!localHash && (resolved.pathname === "/" || resolved.pathname === "");
+
+      if (isRootHashLink) {
+        e.preventDefault();
+        goToAnchor(localHash);
+        return;
+      }
+    } catch {
+      // Non-URL strings continue through the simpler hash logic below.
+    }
 
     // Only intercept bare "#id" anchors
     if (ctaHref.startsWith("#")) {
       e.preventDefault();
-      const id = ctaHref.slice(1);
-
-      const hash = window.location.hash || "";
-      const onHashRouterSubpage = hash.startsWith("#/");
-
-      // If we're already on the landing page, smooth-scroll with offset
-      if (!onHashRouterSubpage || hash === "" || hash === "#home" || hash === "#/") {
-        const el = document.getElementById(id);
-        if (el) {
-          const y = window.scrollY + el.getBoundingClientRect().top - offset;
-          window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
-          return;
-        }
-        // Fallback: set hash so it scrolls once the element exists
-        window.location.hash = `#${id}`;
-        return;
-      }
-
-      // If we're on another route (e.g. #/people), go to home + anchor
-      window.location.href = `/#${id}`;
+      goToAnchor(ctaHref.slice(1));
     }
   };
 

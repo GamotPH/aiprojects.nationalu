@@ -2,14 +2,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-/** Split the title so the first word can be bolded/colored */
-function splitTitle(text = "") {
-  const parts = text.trim().split(/\s+/);
-  if (!parts.length) return ["", ""];
-  const [first, ...rest] = parts;
-  return [first, rest.join(" ")];
-}
-
 export default function ProjectCard({
   title = "",
   subtitle = "",
@@ -21,7 +13,6 @@ export default function ProjectCard({
   newTab = true,       // open EXTERNAL links in a new tab by default
 }) {
   const navigate = useNavigate();
-  const [first, rest] = splitTitle(title);
 
   // Resolve slug robustly (string or {current}); leave undefined if missing
   const effectiveSlug =
@@ -105,9 +96,8 @@ export default function ProjectCard({
         <div className="flex flex-col gap-4 p-6 flex-1 min-h-0">
           {/* Title + subtitle */}
           <div className="min-h-0">
-            <h3 className="text-lg font-semibold text-slate-900 group-hover:underline">
-              <span className="text-nu-blue font-bold">{first}</span>
-              {rest ? ` ${rest}` : ""}
+            <h3 className="text-lg font-bold text-nu-blue group-hover:underline">
+              {title || "Untitled project"}
             </h3>
 
             {subtitle && (

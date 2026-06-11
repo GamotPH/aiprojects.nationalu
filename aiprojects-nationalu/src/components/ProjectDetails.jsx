@@ -187,11 +187,10 @@ const articles = useMemo(() => {
 }, [data, project]);
 
 
-  // Partners (project-level, falling back to global)
+  // Partners are project-specific. Empty project partner lists should stay empty.
   const partners = useMemo(() => {
-    if (project?.partners?.length) return project.partners;
-    return data?.partners || [];
-  }, [data, project]);
+    return Array.isArray(project?.partners) ? project.partners : [];
+  }, [project]);
 
   // ---------------------------
   // ARTICLE DETAILS (local page)
@@ -465,8 +464,8 @@ useEffect(() => {
         kicker={project?.status || data?.heroKicker}
         title={project?.subtitle || data?.heroTitle}
         sub={project?.summary || project?.subtitle || data?.heroSub}
-        ctaText={project?.href ? "Visit project site" : data?.heroCtaText}
-        ctaHref={project?.href || data?.heroCtaHref}
+        ctaText={project?.href ? "Visit project site" : "Read More"}
+        ctaHref={project?.href || "#about"}
       />
 
       {!data && !err && (

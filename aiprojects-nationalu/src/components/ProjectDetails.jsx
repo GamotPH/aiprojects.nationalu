@@ -466,6 +466,7 @@ useEffect(() => {
         sub={project?.summary || project?.subtitle || data?.heroSub}
         ctaText={project?.href ? "Visit project site" : "Read More"}
         ctaHref={project?.href || "#about"}
+        ctaSectionId={project?.href ? undefined : "about"}
       />
 
       {!data && !err && (

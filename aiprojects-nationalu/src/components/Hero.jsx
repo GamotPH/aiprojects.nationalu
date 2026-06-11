@@ -13,6 +13,7 @@ export default function Hero({
   sub,
   ctaText = "Read More",
   ctaHref = "#research",
+  ctaSectionId,
   bgImage = bg1,
   bgImage2 = bg2,
   bgImage3 = bg3,
@@ -22,6 +23,16 @@ export default function Hero({
   const HEADER_H = 80; // h-20
   const PAD = 24;
   const offset = HEADER_H + PAD;
+
+  const getRootHashId = (href) => {
+    try {
+      const resolved = new URL(href, window.location.href);
+      const id = resolved.hash?.startsWith("#") ? resolved.hash.slice(1) : "";
+      return id && (resolved.pathname === "/" || resolved.pathname === "") ? id : "";
+    } catch {
+      return "";
+    }
+  };
 
   const scrollToSection = (id) => {
     const el = document.getElementById(id);
@@ -48,18 +59,17 @@ export default function Hero({
   const handleCta = (e) => {
     if (!ctaHref) return;
 
-    try {
-      const resolved = new URL(ctaHref, window.location.href);
-      const localHash = resolved.hash?.startsWith("#") ? resolved.hash.slice(1) : "";
-      const isRootHashLink = !!localHash && (resolved.pathname === "/" || resolved.pathname === "");
+    if (ctaSectionId) {
+      e.preventDefault();
+      goToAnchor(ctaSectionId);
+      return;
+    }
 
-      if (isRootHashLink) {
-        e.preventDefault();
-        goToAnchor(localHash);
-        return;
-      }
-    } catch {
-      // Non-URL strings continue through the simpler hash logic below.
+    const localHash = getRootHashId(ctaHref);
+    if (localHash) {
+      e.preventDefault();
+      goToAnchor(localHash);
+      return;
     }
 
     // Only intercept bare "#id" anchors
@@ -68,6 +78,9 @@ export default function Hero({
       goToAnchor(ctaHref.slice(1));
     }
   };
+
+  const effectiveHref =
+    ctaSectionId ? `#${ctaSectionId}` : getRootHashId(ctaHref) ? `#${getRootHashId(ctaHref)}` : ctaHref;
 
   return (
     <section
@@ -115,7 +128,7 @@ export default function Hero({
 
             {ctaText && (
               <a
-                href={ctaHref}
+                href={effectiveHref}
                 onClick={handleCta}
                 className="inline-block mt-8 rounded-lg bg-white px-6 py-3 font-semibold text-nu-blue shadow hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
               >

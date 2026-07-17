@@ -15,11 +15,11 @@ export default function Navbar({
   // type: 'route' -> navigate to another page
   const links = useMemo(
     () => [
-      { id: "research",    label: "Research",            type: "hash"  },
+      { id: "research",    label: "About",               type: "hash"  },
       { id: "nicer",       label: "NICER",               type: "route", to: "/nicer" },
       { id: "projects",    label: "Projects",            type: "hash"  },
       { id: "sdgs",        label: "SDGs",                type: "hash"  },
-      { id: "papers",      label: "Papers",              type: "hash"  },
+      { id: "papers",      label: "Publications",        type: "hash"  },
       { id: "people",      label: "People",              type: "route", to: "/people" },
       { id: "collaborate", label: "Collaborate with Us", type: "hash"  },
     ],

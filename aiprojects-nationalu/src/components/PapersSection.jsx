@@ -163,7 +163,7 @@ export default function PapersSection({ items }) {
     >
       <header className="text-center max-w-3xl mx-auto mb-8">
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-ink">
-            Papers
+            Publications
           </h2>
         </header>
 
